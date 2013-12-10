@@ -3,7 +3,10 @@ package com.xuyan.flashlight;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import org.apache.http.auth.NTCredentials;
+
 import android.app.Activity;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.hardware.Camera;
 import android.hardware.Camera.Parameters;
@@ -38,9 +41,11 @@ public class MainActivity extends Activity implements OnClickListener {
 	private Timer mTimer = null;
 	private TimerTask mTimerTask = null;
 	private Handler mHandler = null;
-	private int mTime = 120000;// 默认开启时间为12s
+	private int mTime = 120000;// 默认开启时间为2m
 
 	private static final int CLOSR_FLASHLIGHT = 0;
+
+	public static final String PREFERENCES = "FlashLight";
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -51,8 +56,8 @@ public class MainActivity extends Activity implements OnClickListener {
 				WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		setContentView(R.layout.activity_main);
 
-		sharedPreferences = this.getSharedPreferences("FlashLight",
-				MODE_PRIVATE);
+		sharedPreferences = this
+				.getSharedPreferences(PREFERENCES, MODE_PRIVATE);
 
 		findViews();
 		bindViews();
@@ -80,7 +85,6 @@ public class MainActivity extends Activity implements OnClickListener {
 			tv_click.setVisibility(View.VISIBLE);
 		}
 		sharedPreferences.edit().putBoolean("isFirst", false).commit();
-		mTime = sharedPreferences.getInt("Time", mTime);
 	}
 
 	private void findViews() {
@@ -101,7 +105,8 @@ public class MainActivity extends Activity implements OnClickListener {
 				stopFlashLight();
 				isOn = false;
 			} else {
-				startFlashLight();
+				mTime = sharedPreferences.getInt("protectTime", mTime);
+				startFlashLight(mTime);
 				isOn = true;
 				img_click.setVisibility(View.INVISIBLE);
 				tv_click.setVisibility(View.INVISIBLE);
@@ -113,14 +118,14 @@ public class MainActivity extends Activity implements OnClickListener {
 	}
 
 	// 打开手电筒
-	private void startFlashLight() {
+	private void startFlashLight(int time) {
 		mFlashlightButton.setBackgroundResource(R.drawable.flashlight_on);
 		// 获得Camera对象
 		mCamera = Camera.open();
 		parameters = mCamera.getParameters();
 		parameters.setFlashMode(Parameters.FLASH_MODE_TORCH);
 		mCamera.setParameters(parameters);
-		startTimer();
+		startTimer(time);
 	}
 
 	// 关闭手电筒
@@ -155,13 +160,34 @@ public class MainActivity extends Activity implements OnClickListener {
 	public boolean onMenuItemSelected(int featureId, MenuItem item) {
 		switch (item.getItemId()) {
 		case 0:
-			Toast.makeText(this, "!!!!!!!!!!!!!", Toast.LENGTH_SHORT).show();
+			Intent intent = new Intent();
+			intent.setClass(this, SettingActivity.class);
+			startActivityForResult(intent, 0);
+			overridePendingTransition(R.anim.slide_in_right,
+					R.anim.slide_out_left);
 			break;
 		default:
 			break;
 		}
 		return super.onMenuItemSelected(featureId, item);
 	}
+
+	// 暂时关闭这个方法，因为没有用到它
+	// @Override
+	// protected void onActivityResult(int requestCode, int resultCode, Intent
+	// data) {
+	// super.onActivityResult(requestCode, resultCode, data);
+	// switch (requestCode) {
+	// case 0:
+	// if (resultCode == RESULT_OK) {
+	// mTime = sharedPreferences.getInt("protectTime", 120);
+	// }
+	// break;
+	//
+	// default:
+	// break;
+	// }
+	// }
 
 	private void exit() {
 		if (System.currentTimeMillis() - exitTime > 2000) {
@@ -171,11 +197,13 @@ public class MainActivity extends Activity implements OnClickListener {
 		} else {
 			stopFlashLight();
 			finish();
+			overridePendingTransition(R.anim.slide_in_top,
+					R.anim.slide_out_bottom);
 			System.exit(0);
 		}
 	}
 
-	private void startTimer() {
+	private void startTimer(int time) {
 		if (mTimer == null) {
 			mTimer = new Timer();
 		}
@@ -192,7 +220,7 @@ public class MainActivity extends Activity implements OnClickListener {
 			};
 		}
 		if (mTimer != null && mTimerTask != null)
-			mTimer.schedule(mTimerTask, mTime);
+			mTimer.schedule(mTimerTask, time * 1000);
 	}
 
 	private void stopTimer() {
