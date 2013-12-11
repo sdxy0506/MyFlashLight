@@ -25,8 +25,10 @@ import android.widget.Toast;
 
 import com.umeng.analytics.MobclickAgent;
 import com.umeng.fb.FeedbackAgent;
+import com.umeng.update.UmengDialogButtonListener;
 import com.umeng.update.UmengDownloadListener;
 import com.umeng.update.UmengUpdateAgent;
+import com.umeng.update.UpdateStatus;
 
 public class MainActivity extends Activity implements OnClickListener {
 
@@ -208,6 +210,8 @@ public class MainActivity extends Activity implements OnClickListener {
 		case R.id.feedback:
 			FeedbackAgent agent = new FeedbackAgent(this);
 			agent.startFeedbackActivity();
+			overridePendingTransition(R.anim.slide_in_right,
+					R.anim.slide_out_left);
 			break;
 		case R.id.updata:
 			UmengUpdateAgent.forceUpdate(this);
