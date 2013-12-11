@@ -9,5 +9,8 @@
     <string name="ok">确定</string>
     <string name="second">秒</string>
     <string name="minute">分</string>
+    <string name="setting">设置</string>
+    <string name="feedback">意见反馈</string>
+    <string name="updata">检查更新</string>
 
 </resources>

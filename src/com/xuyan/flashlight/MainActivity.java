@@ -25,10 +25,8 @@ import android.widget.Toast;
 
 import com.umeng.analytics.MobclickAgent;
 import com.umeng.fb.FeedbackAgent;
-import com.umeng.update.UmengDialogButtonListener;
 import com.umeng.update.UmengDownloadListener;
 import com.umeng.update.UmengUpdateAgent;
-import com.umeng.update.UpdateStatus;
 
 public class MainActivity extends Activity implements OnClickListener {
 
@@ -193,27 +191,25 @@ public class MainActivity extends Activity implements OnClickListener {
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		menu.add(0, 0, 0, "设置");
-		menu.add(0, 1, 0, "意见反馈");
-		menu.add(0, 2, 0, "检查更新");
-		return super.onCreateOptionsMenu(menu);
+		getMenuInflater().inflate(R.menu.menu, menu);
+		return true;
 	}
 
 	@Override
 	public boolean onMenuItemSelected(int featureId, MenuItem item) {
 		switch (item.getItemId()) {
-		case 0:
+		case R.id.setting:
 			Intent intent = new Intent();
 			intent.setClass(this, SettingActivity.class);
 			startActivityForResult(intent, 0);
 			overridePendingTransition(R.anim.slide_in_right,
 					R.anim.slide_out_left);
 			break;
-		case 1:
+		case R.id.feedback:
 			FeedbackAgent agent = new FeedbackAgent(this);
 			agent.startFeedbackActivity();
 			break;
-		case 2:
+		case R.id.updata:
 			UmengUpdateAgent.forceUpdate(this);
 			break;
 		default:
