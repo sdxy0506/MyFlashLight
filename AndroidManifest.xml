@@ -12,12 +12,9 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <!-- 开启闪光灯权限 -->
     <uses-permission android:name="android.permission.FLASHLIGHT" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" >
-    </uses-permission>
-    <uses-permission android:name="android.permission.INTERNET" >
-    </uses-permission>
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" >
-    </uses-permission>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
     <application
         android:allowBackup="true"
@@ -53,8 +50,13 @@
             android:screenOrientation="portrait" />
 
         <!-- 友盟key -->
-        <meta-data            android:name="UMENG_APPKEY"            android:value="52a6b31356240b2691000b89" >        </meta-data>
-        <meta-data            android:name="UMENG_CHANNEL"            android:value="360" />
+        <meta-data
+            android:name="UMENG_APPKEY"
+            android:value="52a6b31356240b2691000b89" >
+        </meta-data>
+        <meta-data
+            android:name="UMENG_CHANNEL"
+            android:value="360" />
     </application>
 
 </manifest>

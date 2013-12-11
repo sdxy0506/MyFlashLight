@@ -12,6 +12,7 @@ import android.hardware.Camera.Parameters;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -25,10 +26,10 @@ import android.widget.Toast;
 
 import com.umeng.analytics.MobclickAgent;
 import com.umeng.fb.FeedbackAgent;
-import com.umeng.update.UmengDialogButtonListener;
 import com.umeng.update.UmengDownloadListener;
 import com.umeng.update.UmengUpdateAgent;
-import com.umeng.update.UpdateStatus;
+import com.umeng.update.UmengUpdateListener;
+import com.umeng.update.UpdateResponse;
 
 public class MainActivity extends Activity implements OnClickListener {
 
@@ -55,6 +56,8 @@ public class MainActivity extends Activity implements OnClickListener {
 
 	public static final String PREFERENCES = "FlashLight";
 
+	private boolean isStart = true;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -68,12 +71,13 @@ public class MainActivity extends Activity implements OnClickListener {
 		// 友盟回复自动提示
 		FeedbackAgent agent = new FeedbackAgent(this);
 		agent.sync();
+		UmengUpdateAgent.update(mContext);
 		youmengUpdata();
 
 		sharedPreferences = this
 				.getSharedPreferences(PREFERENCES, MODE_PRIVATE);
 
-		MobclickAgent.setDebugMode(true);
+		// MobclickAgent.setDebugMode(true);
 
 		findViews();
 		bindViews();
@@ -96,7 +100,6 @@ public class MainActivity extends Activity implements OnClickListener {
 
 	private void youmengUpdata() {
 		// 友盟自动升级
-		UmengUpdateAgent.update(this);
 		UmengUpdateAgent.setDownloadListener(new UmengDownloadListener() {
 
 			@Override
@@ -115,6 +118,34 @@ public class MainActivity extends Activity implements OnClickListener {
 				// Toast.LENGTH_SHORT).show();
 				Toast.makeText(mContext, "下载完成 : " + file, Toast.LENGTH_SHORT)
 						.show();
+			}
+		});
+		UmengUpdateAgent.setUpdateListener(new UmengUpdateListener() {
+
+			@Override
+			public void onUpdateReturned(int updateStatus,
+					UpdateResponse updateInfo) {
+				Log.i("updata", "" + updateStatus);
+				switch (updateStatus) {
+				// case 0: // has update
+				// UmengUpdateAgent.showUpdateDialog(mContext, updateInfo);
+				// break;
+				case 1: // has no update
+					if (!isStart) {
+						Toast.makeText(mContext, "目前已是最新版本！",
+								Toast.LENGTH_SHORT).show();
+					}
+
+					break;
+				case 2: // none wifi
+					Toast.makeText(mContext, "没有wifi连接， 只在wifi下更新",
+							Toast.LENGTH_SHORT).show();
+					break;
+				case 3: // time out
+					Toast.makeText(mContext, "超时", Toast.LENGTH_SHORT).show();
+					break;
+				}
+				isStart = true;
 			}
 		});
 	}
@@ -214,6 +245,7 @@ public class MainActivity extends Activity implements OnClickListener {
 					R.anim.slide_out_left);
 			break;
 		case R.id.updata:
+			isStart = false;
 			UmengUpdateAgent.forceUpdate(this);
 			break;
 		default:
