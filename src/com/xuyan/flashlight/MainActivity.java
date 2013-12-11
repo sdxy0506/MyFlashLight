@@ -3,9 +3,8 @@ package com.xuyan.flashlight;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import org.apache.http.auth.NTCredentials;
-
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.hardware.Camera;
@@ -24,7 +23,16 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.umeng.analytics.MobclickAgent;
+import com.umeng.fb.FeedbackAgent;
+import com.umeng.update.UmengDialogButtonListener;
+import com.umeng.update.UmengDownloadListener;
+import com.umeng.update.UmengUpdateAgent;
+import com.umeng.update.UpdateStatus;
+
 public class MainActivity extends Activity implements OnClickListener {
+
+	private Context mContext;
 	private Button mFlashlightButton;
 	// 定义系统所用的照相机
 	private Camera mCamera;
@@ -55,9 +63,17 @@ public class MainActivity extends Activity implements OnClickListener {
 		getWindow().setFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
 				WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		setContentView(R.layout.activity_main);
+		mContext = this;
+
+		// 友盟回复自动提示
+		FeedbackAgent agent = new FeedbackAgent(this);
+		agent.sync();
+		youmengUpdata();
 
 		sharedPreferences = this
 				.getSharedPreferences(PREFERENCES, MODE_PRIVATE);
+
+		MobclickAgent.setDebugMode(true);
 
 		findViews();
 		bindViews();
@@ -76,6 +92,31 @@ public class MainActivity extends Activity implements OnClickListener {
 				}
 			}
 		};
+	}
+
+	private void youmengUpdata() {
+		// 友盟自动升级
+		UmengUpdateAgent.update(this);
+		UmengUpdateAgent.setDownloadListener(new UmengDownloadListener() {
+
+			@Override
+			public void OnDownloadStart() {
+				Toast.makeText(mContext, "开始下载", Toast.LENGTH_SHORT).show();
+			}
+
+			@Override
+			public void OnDownloadUpdate(int progress) {
+
+			}
+
+			@Override
+			public void OnDownloadEnd(int result, String file) {
+				// Toast.makeText(mContext, "download result : " + result ,
+				// Toast.LENGTH_SHORT).show();
+				Toast.makeText(mContext, "下载完成 : " + file, Toast.LENGTH_SHORT)
+						.show();
+			}
+		});
 	}
 
 	private void init() {
@@ -152,7 +193,9 @@ public class MainActivity extends Activity implements OnClickListener {
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		menu.add("设置");
+		menu.add(0, 0, 0, "设置");
+		menu.add(0, 1, 0, "意见反馈");
+		menu.add(0, 2, 0, "检查更新");
 		return super.onCreateOptionsMenu(menu);
 	}
 
@@ -165,6 +208,13 @@ public class MainActivity extends Activity implements OnClickListener {
 			startActivityForResult(intent, 0);
 			overridePendingTransition(R.anim.slide_in_right,
 					R.anim.slide_out_left);
+			break;
+		case 1:
+			FeedbackAgent agent = new FeedbackAgent(this);
+			agent.startFeedbackActivity();
+			break;
+		case 2:
+			UmengUpdateAgent.forceUpdate(this);
 			break;
 		default:
 			break;
@@ -236,4 +286,17 @@ public class MainActivity extends Activity implements OnClickListener {
 		}
 
 	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		MobclickAgent.onPause(this);
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		MobclickAgent.onResume(this);
+	}
+
 }

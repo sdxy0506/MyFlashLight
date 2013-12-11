@@ -1,5 +1,7 @@
 package com.xuyan.flashlight;
 
+import com.umeng.analytics.MobclickAgent;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -35,7 +37,8 @@ public class SettingActivity extends Activity {
 
 	private void init() {
 		btn_ok.setOnClickListener(btnListener);
-		tv_second.setHint("" + sharedPreferences.getInt("protectTime", 120));
+		tv_second.setHint("当前时间为:"
+				+ sharedPreferences.getInt("protectTime", 120));
 	}
 
 	private OnClickListener btnListener = new OnClickListener() {
@@ -63,5 +66,17 @@ public class SettingActivity extends Activity {
 			int seconds = Integer.valueOf(text);
 			sharedPreferences.edit().putInt("protectTime", seconds).commit();
 		}
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		MobclickAgent.onPause(this);
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		MobclickAgent.onResume(this);
 	}
 }
